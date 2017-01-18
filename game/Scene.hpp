@@ -3,6 +3,7 @@
 #include "commons.hpp"
 #include "Noise.hpp"
 
+class BiomeFunction;
 class Scene final : public GameObject {
     public:
         Scene();
@@ -17,7 +18,8 @@ class Scene final : public GameObject {
         MeshIndexed quad;
         ShaderProgram program;
         Texture2D tex;
-        Noise n[2];
+        BiomeFunction* func = nullptr;
+        std::mt19937 generator;
 };
 
 #endif // SCENE_HPP

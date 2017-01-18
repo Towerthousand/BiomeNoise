@@ -1,5 +1,9 @@
 #include "Scene.hpp"
 #include "MyProfiler.hpp"
+#include "BiomeZoom.hpp"
+#include "BiomeConst.hpp"
+#include "BiomeReplace.hpp"
+#include "BiomeIsland.hpp"
 
 Scene::Scene() {
     //Setup gl stuff
@@ -40,9 +44,65 @@ Scene::Scene() {
     quad.setIndexData(&indexes[0], indexes.size());
     quad.setVertexData(&data[0], data.size());
     program = ShaderProgram(Storage::openAsset("shaders/tex.vert"),Storage::openAsset("shaders/tex.frag"));
-    tex = Texture2D(vec2ui(Window::getInstance()->getSize().x/2,Window::getInstance()->getSize().y/2), TextureFormat::RGBA8);
+    tex = Texture2D(vec2ui(Window::getInstance()->getSize().x/4,Window::getInstance()->getSize().y/4), TextureFormat::SRGBA8);
+    Log::message() << tex.getSize() << Log::Flush;
     tex.setFilter(GL_NEAREST, GL_NEAREST);
-    n[0].seed(0);
+
+    // Build func
+    generator.seed(13213);
+    func = new BiomeConst(&generator, 0);
+    func = new BiomeReplace(&generator, func, BiomeSet({0}), 1, 10, false);
+
+    func = new BiomeZoom(&generator, func, true);
+    func = new BiomeIsland(&generator, func);
+    func = new BiomeZoom(&generator, func, false);
+    func = new BiomeIsland(&generator, func);
+
+    func = new BiomeReplace(&generator, func, BiomeSet({1}), 12, 5, false);
+
+    func = new BiomeZoom(&generator, func, false);
+    func = new BiomeIsland(&generator, func);
+    func = new BiomeZoom(&generator, func, false);
+    func = new BiomeIsland(&generator, func);
+
+    func = new BiomeReplace(&generator, func, BiomeSet({0}), 14, 100, true);
+
+    BiomeFunction* river = func;
+    //do river..
+
+    //Non-icy
+    func = new BiomeReplace(
+        &generator,
+        func,
+        BiomeSet({1}),
+        {
+            {1, 1},
+            {2, 1},
+            {3, 1},
+            {4, 1},
+            {5, 1},
+            {6, 1},
+            {21, 1},
+        }
+    );
+
+    //Icy
+    func = new BiomeReplace(&generator, func, BiomeSet({12}), 5, 4);
+
+    func = new BiomeZoom(&generator, func, false);
+    func = new BiomeZoom(&generator, func, false);
+
+    //Hills
+    func = new BiomeReplace(&generator, func, BiomeSet({2}), 17, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({4}), 18, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({5}), 19, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({1}), 4, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({12}), 13, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({21}), 22, 3, true);
+    func = new BiomeZoom(&generator, func, false);
+    func = new BiomeIsland(&generator, func);
+    func = new BiomeZoom(&generator, func, false);
+
     genTexData();
 }
 
@@ -92,69 +152,35 @@ float denorm(float f) {
 
 void Scene::genTexData() {
     vec2ui size = tex.getSize();
-    vec4uc pixels[size.y][size.x];
-    n[0].scale = 100.0f;
-    n[0].min = 0.0f;
-    n[0].max = 1.0f;
-    n[1].scale = 100.0f;
-    n[1].min = 0.0f;
-    n[1].max = 1.0f;
-    vec3uc colors[10] = {
-        {255, 153, 51}, //0 desert
-        {204, 204, 153},//1 grass desert
-        {255, 255, 255},//2 tundra
-        {153, 255, 102},//3 taiga
-        {102, 102, 0},  //4 savanna
-        {132, 204, 68}, //5 woods
-        {1, 84, 1},     //6 forest
-        {0, 153, 33},   //7 seasonal forest
-        {51, 51, 0},    //8 swamp
-        {0, 255, 0},    //9 rain forest
+    vec4uc pixels[size.x][size.y];
+    vec3uc colors[23] = {
+        {0, 0, 112},     // 0 Ocean
+        {141, 179, 96},  // 1 Plains
+        {250, 148, 24},  // 2 Desert
+        {96, 96, 96},    // 3 Extreme Hills
+        {5, 102, 33},    // 4 Forest
+        {11, 102, 89},   // 5 Taiga
+        {7, 249, 178},   // 6 Swampland
+        {0, 0, 255},     // 7 River
+        {255, 0, 0},     // 8 Hell
+        {128, 128, 255}, // 9 Sky
+        {128, 128, 255}, // 10 FrozenOcean
+        {160, 160, 255}, // 11 FrozenRiver
+        {255, 255, 255}, // 12 IcePlains
+        {160, 160, 160}, // 13 IceMountains
+        {255, 0, 255},   // 14 MushroomIsland
+        {160, 0, 255},   // 15 MushroomIslandShore
+        {250, 222, 85},  // 16 Beach
+        {210, 95, 18},   // 17 DesertHills
+        {34, 85, 28},    // 18 ForestHills
+        {22, 57, 51},    // 19 TaigaHills
+        {114, 120, 154}, // 20 Edge
+        {83, 123, 9},    // 21 Jungle
+        {44, 66, 5},     // 22 JungleHills
     };
-    int biome = 0;
+    std::vector<int> data = func->getBiomeData(offset.x, offset.y, size.x, size.y);
     for(unsigned int i = 0; i < size.x; ++i)
-        for(unsigned int j = 0; j < size.y; ++j) {
-            vec2i c = vec2i(i,j) + offset;
-            float prec = denorm(n[0].octavedGet(c.x, c.y, 8));
-            float temp = sqrt(denorm(n[1].octavedGet(c.x, c.y, 8)));
-            prec = prec*temp;
-            prec *= 100.0f;
-            temp *= 100.0f;
-            // tundra
-            if(temp < 25.0f) biome = 2;
-            // taiga or grass desert
-            else if(temp < 50.0f) {
-                // taiga
-                if(prec > 25.0f) biome = 3;
-                // grass desert
-                else biome = 1;
-            }
-            // desert or grass desert
-            else if(prec < 25.0f) {
-                // grass desert
-                if(temp < 70) biome = 1;
-                // desert
-                else biome = 0;
-            }
-            // woods, forest or swamp
-            else if(temp < 75.0f) {
-                // woods
-                if(prec < 50.0f) biome = 5;
-                // forest
-                else if(prec < 75.0f) biome = 6;
-                // swamp
-                else biome = 8;
-            }
-            // savanna, seasonal forest or rainforest
-            else {
-                // savanna
-                if(prec < 50.0f) biome = 4;
-                // seasonal forest
-                else if(prec < 75.0f) biome = 7;
-                // rainforest
-                else biome = 9;
-            }
-            pixels[j][i] = vec4uc(colors[biome], 255);
-        }
+        for(unsigned int j = 0; j < size.y; ++j)
+            pixels[i][j] = vec4uc(colors[data[i*size.y + j]], 255);
     tex.setData(&pixels[0][0]);
 }
