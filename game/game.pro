@@ -24,7 +24,14 @@ HEADERS += \
     commons.hpp \
     Scene.hpp \
     Noise.hpp \
-    MyProfiler.hpp
+    MyProfiler.hpp \
+    BiomeZoom.hpp \
+    BiomeFunction.hpp \
+    BiomeReplace.hpp \
+    BiomeIsland.hpp \
+    BiomeSet.hpp \
+    BiomeConst.hpp
+
 
 OTHER_FILES += \
     assets/shaders/tex.frag \
