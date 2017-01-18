@@ -38,7 +38,10 @@ class BiomeZoom final : public BiomeFunction {
                     // Set topright corner
                     zoomedData[currZoomedZ] = choose(topleft, topright, x + baseX, z + baseZ, 1);
                     // Set bottomRight corner
-                    zoomedData[currZoomedZ++ + zoomedSizeX] = modeOrRandom(topleft, topright, bottomleft, bottomright, x + baseX, z + baseZ, 2);
+                    if(fuzzy)
+                        zoomedData[currZoomedZ++ + zoomedSizeX] = choose(topleft, topright, bottomleft, bottomright, x + baseX, z + baseZ, 2);
+                    else
+                        zoomedData[currZoomedZ++ + zoomedSizeX] = modeOrRandom(topleft, topright, bottomleft, bottomright, x + baseX, z + baseZ, 2);
                     topleft = topright;
                     bottomleft = bottomright;
                 }
@@ -59,31 +62,35 @@ class BiomeZoom final : public BiomeFunction {
         }
 
     private:
-        int choose(int par1, int par2, int x, int z, int n) const {
-            return this->randForPos(2, x, z, n) == 0 ? par1 : par2;
+        int choose(int a, int b, int x, int z, int n) const {
+            return randForPos(2, x, z, n) == 0 ? a : b;
         }
 
-        int modeOrRandom(int par1, int par2, int par3, int par4, int x, int z, int n) const {
-            if (par2 == par3 && par3 == par4) return par2;
-            else if (par1 == par2 && par1 == par3) return par1;
-            else if (par1 == par2 && par1 == par4) return par1;
-            else if (par1 == par3 && par1 == par4) return par1;
-            else if (par1 == par2 && par3 != par4) return par1;
-            else if (par1 == par3 && par2 != par4) return par1;
-            else if (par1 == par4 && par2 != par3) return par1;
-            else if (par2 == par1 && par3 != par4) return par2;
-            else if (par2 == par3 && par1 != par4) return par2;
-            else if (par2 == par4 && par1 != par3) return par2;
-            else if (par3 == par1 && par2 != par4) return par3;
-            else if (par3 == par2 && par1 != par4) return par3;
-            else if (par3 == par4 && par1 != par2) return par3;
-            else if (par4 == par1 && par2 != par3) return par3;
-            else if (par4 == par2 && par1 != par3) return par3;
-            else if (par4 == par3 && par1 != par2) return par3;
-            else
-            {
-                int var5 = this->randForPos(4, x, z, n);
-                return var5 == 0 ? par1 : (var5 == 1 ? par2 : (var5 == 2 ? par3 : par4));
+        int choose(int a, int b, int c, int d, int x, int z, int n) const {
+            int r = randForPos(4, x, z, n);
+            return r == 0 ? a : (r == 1 ? b : (r == 2 ? c : d));
+        }
+
+        int modeOrRandom(int a, int b, int c, int d, int x, int z, int n) const {
+            if (b == c && c == d) return b;
+            else if (a == b && a == c) return a;
+            else if (a == b && a == d) return a;
+            else if (a == c && a == d) return a;
+            else if (a == b && c != d) return a;
+            else if (a == c && b != d) return a;
+            else if (a == d && b != c) return a;
+            else if (b == a && c != d) return b;
+            else if (b == c && a != d) return b;
+            else if (b == d && a != c) return b;
+            else if (c == a && b != d) return c;
+            else if (c == b && a != d) return c;
+            else if (c == d && a != b) return c;
+            else if (d == a && b != c) return c;
+            else if (d == b && a != c) return c;
+            else if (d == c && a != b) return c;
+            else {
+                int r = this->randForPos(4, x, z, n);
+                return r == 0 ? a : (r == 1 ? b : (r == 2 ? c : d));
             }
         }
 
