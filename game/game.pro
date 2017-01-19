@@ -29,6 +29,7 @@ HEADERS += \
     BiomeFunction.hpp \
     BiomeReplace.hpp \
     BiomeIsland.hpp \
+    BiomeOutline.hpp \
     BiomeSet.hpp \
     BiomeConst.hpp
 
