@@ -45,8 +45,7 @@ Scene::Scene() {
     quad.setIndexData(&indexes[0], indexes.size());
     quad.setVertexData(&data[0], data.size());
     program = ShaderProgram(Storage::openAsset("shaders/tex.vert"),Storage::openAsset("shaders/tex.frag"));
-    tex = Texture2D(vec2ui(Window::getInstance()->getSize().x/2,Window::getInstance()->getSize().y/2), TextureFormat::SRGBA8);
-    Log::message() << tex.getSize() << Log::Flush;
+    tex = Texture2D(vec2ui(Window::getInstance()->getSize().x/4,Window::getInstance()->getSize().y/4), TextureFormat::SRGBA8);
     tex.setFilter(GL_NEAREST, GL_NEAREST);
 
     // Build func
@@ -166,7 +165,7 @@ float denorm(float f) {
 
 void Scene::genTexData() {
     vec2ui size = tex.getSize();
-    vec4uc pixels[size.x][size.y];
+    static vec4uc* pixels = new vec4uc[size.x*size.y];
     vec3uc colors[23] = {
         {0, 0, 112},     // 0 Ocean
         {141, 179, 96},  // 1 Plains
@@ -195,6 +194,6 @@ void Scene::genTexData() {
     std::vector<int> data = func->getBiomeData(offset.x, offset.y, size.x, size.y);
     for(unsigned int i = 0; i < size.x; ++i)
         for(unsigned int j = 0; j < size.y; ++j)
-            pixels[i][j] = vec4uc(colors[data[i*size.y + j]], 255);
-    tex.setData(&pixels[0][0]);
+            pixels[i*size.y + j] = vec4uc(colors[data[i*size.y + j]], 255);
+    tex.setData(&pixels[0]);
 }
