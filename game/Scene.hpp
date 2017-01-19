@@ -20,6 +20,32 @@ class Scene final : public GameObject {
         Texture2D tex;
         BiomeFunction* func = nullptr;
         std::mt19937 generator;
+
+    enum Biome {
+        OCEAN = 0,
+        PLAINS,
+        DESERT,
+        EXTREMEHILLS,
+        FOREST,
+        TAIGA,
+        SWAMPLAND,
+        RIVER,
+        HELL,
+        SKY,
+        FROZENOCEAN,
+        FROZENRIVER,
+        ICEPLAINS,
+        ICEMOUNTAINS,
+        MUSHROOMISLAND,
+        MUSHROOMISLANDSHORE,
+        BEACH,
+        DESERTHILLS,
+        FORESTHILLS,
+        TAIGAHILLS,
+        EXTREMEHILLSEDGE,
+        JUNGLE,
+        JUNGLEHILLS
+    };
 };
 
 #endif // SCENE_HPP
