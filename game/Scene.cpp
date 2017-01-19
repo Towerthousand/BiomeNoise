@@ -4,6 +4,7 @@
 #include "BiomeConst.hpp"
 #include "BiomeReplace.hpp"
 #include "BiomeIsland.hpp"
+#include "BiomeOutline.hpp"
 
 Scene::Scene() {
     //Setup gl stuff
@@ -44,28 +45,28 @@ Scene::Scene() {
     quad.setIndexData(&indexes[0], indexes.size());
     quad.setVertexData(&data[0], data.size());
     program = ShaderProgram(Storage::openAsset("shaders/tex.vert"),Storage::openAsset("shaders/tex.frag"));
-    tex = Texture2D(vec2ui(Window::getInstance()->getSize().x/4,Window::getInstance()->getSize().y/4), TextureFormat::SRGBA8);
+    tex = Texture2D(vec2ui(Window::getInstance()->getSize().x/2,Window::getInstance()->getSize().y/2), TextureFormat::SRGBA8);
     Log::message() << tex.getSize() << Log::Flush;
     tex.setFilter(GL_NEAREST, GL_NEAREST);
 
     // Build func
     generator.seed(13213);
     func = new BiomeConst(&generator, 0);
-    func = new BiomeReplace(&generator, func, BiomeSet({0}), 1, 10, false);
+    func = new BiomeReplace(&generator, func, BiomeSet({OCEAN}), PLAINS, 10, false);
 
     func = new BiomeZoom(&generator, func, true);
     func = new BiomeIsland(&generator, func);
     func = new BiomeZoom(&generator, func, false);
     func = new BiomeIsland(&generator, func);
 
-    func = new BiomeReplace(&generator, func, BiomeSet({1}), 12, 5, false);
+    func = new BiomeReplace(&generator, func, BiomeSet({PLAINS}), ICEPLAINS, 5, false);
 
     func = new BiomeZoom(&generator, func, false);
     func = new BiomeIsland(&generator, func);
     func = new BiomeZoom(&generator, func, false);
     func = new BiomeIsland(&generator, func);
 
-    func = new BiomeReplace(&generator, func, BiomeSet({0}), 14, 100, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({OCEAN}), MUSHROOMISLAND, 100, true);
 
     BiomeFunction* river = func;
     //do river..
@@ -76,31 +77,44 @@ Scene::Scene() {
         func,
         BiomeSet({1}),
         {
-            {1, 1},
-            {2, 1},
-            {3, 1},
-            {4, 1},
-            {5, 1},
-            {6, 1},
-            {21, 1},
+            {PLAINS, 1},
+            {DESERT, 1},
+            {EXTREMEHILLS, 1},
+            {FOREST, 1},
+            {TAIGA, 1},
+            {SWAMPLAND, 1},
+            {JUNGLE, 1},
         }
     );
 
     //Icy
-    func = new BiomeReplace(&generator, func, BiomeSet({12}), 5, 4);
+    func = new BiomeReplace(&generator, func, BiomeSet({ICEPLAINS}), TAIGA, 4);
 
     func = new BiomeZoom(&generator, func, false);
     func = new BiomeZoom(&generator, func, false);
 
     //Hills
-    func = new BiomeReplace(&generator, func, BiomeSet({2}), 17, 3, true);
-    func = new BiomeReplace(&generator, func, BiomeSet({4}), 18, 3, true);
-    func = new BiomeReplace(&generator, func, BiomeSet({5}), 19, 3, true);
-    func = new BiomeReplace(&generator, func, BiomeSet({1}), 4, 3, true);
-    func = new BiomeReplace(&generator, func, BiomeSet({12}), 13, 3, true);
-    func = new BiomeReplace(&generator, func, BiomeSet({21}), 22, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({DESERT}), DESERTHILLS, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({FOREST}), FORESTHILLS, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({TAIGA}), TAIGAHILLS, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({PLAINS}), FOREST, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({ICEPLAINS}), ICEMOUNTAINS, 3, true);
+    func = new BiomeReplace(&generator, func, BiomeSet({JUNGLE}), JUNGLEHILLS, 3, true);
     func = new BiomeZoom(&generator, func, false);
     func = new BiomeIsland(&generator, func);
+    func = new BiomeZoom(&generator, func, false);
+
+    // Shores
+    func = new BiomeOutline(&generator, func, BiomeSet({OCEAN}), BiomeSet({EXTREMEHILLS, SWAMPLAND, MUSHROOMISLAND}, true), BEACH, true);
+    func = new BiomeOutline(&generator, func, BiomeSet({EXTREMEHILLS}), BiomeSet({}, true), EXTREMEHILLSEDGE, false);
+    func = new BiomeOutline(&generator, func, BiomeSet({MUSHROOMISLAND}), BiomeSet({}, true), MUSHROOMISLANDSHORE, false);
+
+    // Add ponds
+    func = new BiomeReplace(&generator, func, BiomeSet({JUNGLE, JUNGLEHILLS}), RIVER, 8, false);
+    func = new BiomeReplace(&generator, func, BiomeSet({SWAMPLAND}), RIVER, 6, false);
+
+    // Last zooms
+    func = new BiomeZoom(&generator, func, false);
     func = new BiomeZoom(&generator, func, false);
 
     genTexData();
@@ -174,7 +188,7 @@ void Scene::genTexData() {
         {210, 95, 18},   // 17 DesertHills
         {34, 85, 28},    // 18 ForestHills
         {22, 57, 51},    // 19 TaigaHills
-        {114, 120, 154}, // 20 Edge
+        {114, 120, 154}, // 20 Extreme Hills Edge
         {83, 123, 9},    // 21 Jungle
         {44, 66, 5},     // 22 JungleHills
     };
