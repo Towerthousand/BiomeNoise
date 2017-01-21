@@ -5,6 +5,7 @@
 #include "BiomeReplace.hpp"
 #include "BiomeIsland.hpp"
 #include "BiomeOutline.hpp"
+#include "BiomeSmooth.hpp"
 
 Scene::Scene() {
     //Setup gl stuff
@@ -67,8 +68,23 @@ Scene::Scene() {
 
     func = new BiomeReplace(&generator, func, BiomeSet({OCEAN}), MUSHROOMISLAND, 100, true);
 
+    // Do river
     BiomeFunction* river = func;
-    //do river..
+    river = new BiomeReplace(
+        &generator,
+        river,
+        BiomeSet({OCEAN}, true),
+        {{DESERT, 1}, {FOREST, 1}}
+    );
+    river = new BiomeZoom(&generator, river);
+    river = new BiomeZoom(&generator, river);
+    river = new BiomeZoom(&generator, river);
+    river = new BiomeZoom(&generator, river);
+    river = new BiomeZoom(&generator, river);
+    river = new BiomeZoom(&generator, river);
+    river = new BiomeOutline(&generator, river, BiomeSet({}, true), BiomeSet({}, true), RIVER, false);
+    river = new BiomeReplace(&generator, river, BiomeSet({OCEAN}), RIVER, false);
+    river = new BiomeSmooth(&generator, river);
 
     //Non-icy
     func = new BiomeReplace(
@@ -115,6 +131,8 @@ Scene::Scene() {
     // Last zooms
     func = new BiomeZoom(&generator, func, false);
     func = new BiomeZoom(&generator, func, false);
+
+    func = new BiomeSmooth(&generator, func);
 
     genTexData();
 }
