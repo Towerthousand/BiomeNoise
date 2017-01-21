@@ -21,14 +21,12 @@ class BiomeZoom final : public BiomeFunction {
             std::vector<int>  baseData = base->getBiomeData(baseX, baseZ, baseSizeX, baseSizeZ);
             std::vector<int>  zoomedData = std::vector<int>(zoomedSizeX * zoomedSizeZ);
 
-            for (int z = 0; z < baseSizeZ - 1; ++z)
-            {
+            for (int z = 0; z < baseSizeZ - 1; ++z) {
                 int currZoomedZ = (z << 1) * zoomedSizeX;
                 int topleft = baseData[0 + (z + 0) * baseSizeX]; //baseData[z][0]
                 int bottomleft = baseData[0 + (z + 1) * baseSizeX]; //baseData[z+1][0]
 
-                for (int x = 0; x < baseSizeX - 1; ++x)
-                {
+                for (int x = 0; x < baseSizeX - 1; ++x) {
                     int topright = baseData[x + 1 + (z + 0) * baseSizeX]; //baseData[z][x+1]
                     int bottomright = baseData[x + 1 + (z + 1) * baseSizeX]; //baseData[z+1][x+1]
                     // Set topleft corner

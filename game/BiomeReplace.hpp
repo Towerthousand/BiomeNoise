@@ -1,7 +1,6 @@
 #ifndef BIOMEREPLACE_HPP
 #define BIOMEREPLACE_HPP
 #include "BiomeFunction.hpp"
-#include "BiomeSet.hpp"
 
 class BiomeReplace final : public BiomeFunction {
     public:

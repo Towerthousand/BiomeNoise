@@ -1,7 +1,6 @@
 #ifndef BIOMEOUTLINE_HPP
 #define BIOMEOUTLINE_HPP
 #include "BiomeFunction.hpp"
-#include "BiomeSet.hpp"
 
 class BiomeOutline final : public BiomeFunction {
     public:

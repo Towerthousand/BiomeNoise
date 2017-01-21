@@ -1,7 +1,7 @@
 #ifndef BIOMEFUNCITON_HPP
 #define BIOMEFUNCITON_HPP
 #include "commons.hpp"
-
+#include "BiomeSet.hpp"
 
 class BiomeFunction { //abstract
     public:

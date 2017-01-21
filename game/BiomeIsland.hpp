@@ -17,10 +17,8 @@ class BiomeIsland final : public BiomeFunction {
             std::vector<int> baseData = base->getBiomeData(px2, pz2, sx2, sz2);
             std::vector<int> data(sx * sz);
 
-            for (int z = 0; z < sz; ++z)
-            {
-                for (int x = 0; x < sx; ++x)
-                {
+            for (int z = 0; z < sz; ++z) {
+                for (int x = 0; x < sx; ++x) {
                     int topLeft     = baseData[x + 0 + (z + 0) * sx2];
                     int topRight    = baseData[x + 2 + (z + 0) * sx2];
                     int bottomLeft  = baseData[x + 0 + (z + 2) * sx2];
