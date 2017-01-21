@@ -2,6 +2,7 @@
 #include "MyProfiler.hpp"
 #include "BiomeZoom.hpp"
 #include "BiomeConst.hpp"
+#include "BiomeCombine.hpp"
 #include "BiomeReplace.hpp"
 #include "BiomeIsland.hpp"
 #include "BiomeOutline.hpp"
@@ -134,6 +135,11 @@ Scene::Scene() {
 
     func = new BiomeSmooth(&generator, func);
 
+    //Mix river and land
+    river = new BiomeCombine(&generator, river, func, BiomeSet({}, true), BiomeSet({OCEAN}), -1);
+    func = new BiomeCombine(&generator, func, river, BiomeSet({ICEPLAINS}), BiomeSet({RIVER}), FROZENRIVER);
+    func = new BiomeCombine(&generator, func, river, BiomeSet({FROZENRIVER}, true), BiomeSet({RIVER}), RIVER);
+        
     genTexData();
 }
 
